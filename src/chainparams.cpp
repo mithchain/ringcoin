@@ -66,7 +66,7 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        //consensus.nSubsidyHalvingInterval = 210000;   // No halving on chain
+        //consensus.nSubsidyHalvingInterval = 420000;   // Halve every 420,000 blocks
         //consensus.BIP16Exception = uint256S("0x0");   // No BIP16 exception on chain
         consensus.BIP34Height = 100;
         consensus.BIP34Hash = uint256();                // Not needed; activated on unforkable block below initial distro end
