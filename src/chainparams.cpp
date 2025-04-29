@@ -1,3 +1,4 @@
+// Copyright (c) 2025 The Dwarfchain Developers
 // Copyright (c) 2018-2019 The Ring Developers
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
