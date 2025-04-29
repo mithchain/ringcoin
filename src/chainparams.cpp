@@ -114,10 +114,10 @@ public:
         consensus.lastInitialDistributionHeight = LAST_ID_HEIGHT;                                                                   // Height of last block containing initial distribution payouts to foreign coins
         consensus.powLimitInitialDistribution = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");       // Lower-than-powLimit difficulty for initial distribution blocks only
         consensus.slowStartBlocks = 2000;                                                                                           // Scale initial block reward up over this many blocks
-        consensus.blockSubsidyPow = 0.2 * COIN;             // Miner rewards for each block type
+        consensus.blockSubsidyPow = 128 * COIN;             // Miner rewards for each block type
         consensus.blockSubsidyHive = 1 * COIN;
-        consensus.blockSubsidyPopPrivate = 0.2 * COIN;
-        consensus.blockSubsidyPopPublic = 0.05 * COIN;
+        consensus.blockSubsidyPopPrivate = 1 * COIN;
+        consensus.blockSubsidyPopPublic = 0.5 * COIN;
 
         // Ring-fork: Hive: Consensus Fields
         consensus.dwarfCost = 0.01 * COIN;                  // Cost of a dwarf
@@ -165,12 +165,12 @@ public:
         pchMessageStart[1] = 0xfe;
         pchMessageStart[2] = 0x83;
         pchMessageStart[3] = 0x9a;
-        nDefaultPort = 28971;
+        nDefaultPort = 8312;
         nPruneAfterHeight = 100000;
         m_assumed_blockchain_size = 1;
         m_assumed_chain_state_size = 1;
 
-        genesis = CreateGenesisBlock(GENESIS_TIMESTAMP, GENESIS_NONCE, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(GENESIS_TIMESTAMP, GENESIS_NONCE, 0x1e0ffff0, 1, 128 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
         assert(consensus.hashGenesisBlock == uint256S(GENESIS_HASH));
@@ -230,7 +230,7 @@ public:
         consensus.BIP65Height = 1;
         consensus.BIP66Height = 1;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetSpacing = 90; // 90 secs
+        consensus.nPowTargetSpacing = 300; // 300 secs
         consensus.nExpectedBlockSpacing = consensus.nPowTargetSpacing / 3;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -270,10 +270,10 @@ public:
         consensus.lastInitialDistributionHeight = 2000;                                                                             // Height of last block containing initial distribution payouts to foreign coins
         consensus.powLimitInitialDistribution = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");       // Lower-than-powLimit difficulty for initial distribution blocks only
         consensus.slowStartBlocks = 400;                                                                                            // Scale initial block reward up over this many blocks      
-        consensus.blockSubsidyPow = 0.2 * COIN;             // Miner rewards for each block type
+        consensus.blockSubsidyPow = 128 * COIN;             // Miner rewards for each block type
         consensus.blockSubsidyHive = 1 * COIN;
-        consensus.blockSubsidyPopPrivate = 0.2 * COIN;
-        consensus.blockSubsidyPopPublic = 0.05 * COIN;
+        consensus.blockSubsidyPopPrivate = 1 * COIN;
+        consensus.blockSubsidyPopPublic = 0.5 * COIN;
 
         // Ring-fork: Hive: Consensus Fields
         consensus.dwarfCost = 0.01 * COIN;                  // Cost of a dwarf
@@ -316,12 +316,12 @@ public:
         pchMessageStart[1] = 0xc4;
         pchMessageStart[2] = 0xb7;
         pchMessageStart[3] = 0x93;
-        nDefaultPort = 28981;
+        nDefaultPort = 8313;
         nPruneAfterHeight = 1000;
         m_assumed_blockchain_size = 1;
         m_assumed_chain_state_size = 1;
 
-        genesis = CreateGenesisBlock(GENESIS_TIMESTAMP, GENESIS_NONCE, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(GENESIS_TIMESTAMP, GENESIS_NONCE, 0x1e0ffff0, 1, 128 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();       
         assert(consensus.hashGenesisBlock == uint256S(GENESIS_HASH));
         assert(genesis.hashMerkleRoot == uint256S(GENESIS_MERKLE));
@@ -376,7 +376,7 @@ public:
         consensus.BIP65Height = 1; // BIP65 activated on regtest (Used in functional tests)
         consensus.BIP66Height = 1; // BIP66 activated on regtest (Used in functional tests)
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetSpacing = 2.5 * 60; // 2.5 minutes
+        consensus.nPowTargetSpacing = 15 * 60; // 15 minutes
         consensus.nExpectedBlockSpacing = consensus.nPowTargetSpacing / 3;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
@@ -409,7 +409,7 @@ public:
 
         UpdateVersionBitsParametersFromArgs(args);
 
-        genesis = CreateGenesisBlock(GENESIS_TIMESTAMP, GENESIS_NONCE, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(GENESIS_TIMESTAMP, GENESIS_NONCE, 0x1e0ffff0, 1, 128 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();       
         assert(consensus.hashGenesisBlock == uint256S(GENESIS_HASH));
         assert(genesis.hashMerkleRoot == uint256S(GENESIS_MERKLE));
