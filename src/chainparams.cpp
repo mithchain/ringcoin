@@ -123,8 +123,8 @@ public:
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.00009;                      // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.00005;                      // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
-        consensus.maxConsecutiveHiveBlocks = 5;             // Maximum hive blocks that can occur consecutively before a PoW block is required
-        consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
+        consensus.maxConsecutiveHiveBlocks = 1;             // Maximum hive blocks that can occur consecutively before a PoW block is required
+        consensus.hiveDifficultyWindow = 10;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // Ring-fork: Pop: Consensus fields
         consensus.popBlocksPerHive = 1;                     // Expected number of pop blocks per Hive block. Note that increasing this here is not enough to spawn additional games, etc; this is used for time estimations.
