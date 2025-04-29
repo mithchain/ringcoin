@@ -109,13 +109,13 @@ public:
         consensus.dwarfCost = 0.01 * COIN;                  // Cost of a dwarf
         consensus.dwarfCreationAddress = "RNGSummonADwarvenMiningArmyXYzDNsz";  // Unspendable address for dwarf creation
         consensus.hiveCommunityAddress = "RNGBEERnxAdgdRfSa45NFy5bZfQPYbztkn";  // Community fund address
-        consensus.communityContribFactor = 5;               // Optionally, donate dct_value/maxCommunityContribFactor to community fund
-        consensus.dwarfGestationBlocks = 2880;              // The number of blocks for a new dwarf to mature (approx 24 hours)
-        consensus.dwarfLifespanBlocks = 30000;              // The number of blocks a dwarf lives for after maturation (approx 10 days)
+        consensus.communityContribFactor = 0.25;               // Optionally, donate dct_value/maxCommunityContribFactor to community fund
+        consensus.dwarfGestationBlocks = 288;           // The number of blocks for a new dwarf to mature (approx 24 hours)
+        consensus.dwarfLifespanBlocks = 1;              // The number of blocks a dwarf lives for after maturation (approx 10 days)
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) dwarf hash target
         consensus.minHiveCheckBlock = consensus.lastInitialDistributionHeight + 1;   // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential DCTs)
-        consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many Hive and pow blocks combined should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 2;        // Observed Hive block frequency (1 out of this many Hive and pow blocks combined are observed to be Hive)
+        consensus.hiveBlockSpacingTarget = 5;               // Target Hive block frequency (1 out of this many Hive and pow blocks combined should be Hivemined)
+        consensus.hiveBlockSpacingTargetTypical = 5;        // Observed Hive block frequency (1 out of this many Hive and pow blocks combined are observed to be Hive)
         consensus.hiveNonceMarker = 1;                      // Nonce marker for hivemined blocks
         consensus.minK = 2;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxK = 16;                                // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
@@ -123,7 +123,7 @@ public:
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.00009;                      // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.00005;                      // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
-        consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
+        consensus.maxConsecutiveHiveBlocks = 5;             // Maximum hive blocks that can occur consecutively before a PoW block is required
         consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // Ring-fork: Pop: Consensus fields
