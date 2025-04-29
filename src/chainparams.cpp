@@ -95,22 +95,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = GENESIS_TIMESTAMP;            // Begin activation period with genesis
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = GENESIS_TIMESTAMP + 31536000;   // Genesis + 1 year
 
-        // Ring-fork: Foreign coin fields
-        const int fcc = Consensus::FOREIGN_COIN_COUNT;
-        std::string foreignCoinNames[fcc] =           {"BTC", "LCC",  "DOGE", "DASH"};
-        unsigned char foreignCoinP2PKHPrefixes[fcc] = {0,     28,     30,     76};
-        unsigned char foreignCoinP2SHPrefixes[fcc] =  {5,     5,      22,     16};      // Any LCC addresses starting 3 (very old pre-fork P2SH) will read as BTC addresses due to same version byte. Display issue only; keys should still import fine.
-        unsigned char foreignCoinP2SH2Prefixes[fcc] = {0,     50,     0,      0};       // Only used by LCC and Litecoin; skipped if 0.
-        unsigned char foreignCoinWIFPrefixes[fcc] =   {128,   176,    158,    204};    
-        std::string foreignCoinBech32HRPs[fcc] =      {"bc",  "lcc",  "",     ""};	    // Blank means no bech32 support in foreign chain
-
-        std::copy(std::begin(foreignCoinNames), std::end(foreignCoinNames), std::begin(consensus.foreignCoinNames));        
-        std::copy(std::begin(foreignCoinP2PKHPrefixes), std::end(foreignCoinP2PKHPrefixes), std::begin(consensus.foreignCoinP2PKHPrefixes));
-        std::copy(std::begin(foreignCoinP2SHPrefixes), std::end(foreignCoinP2SHPrefixes), std::begin(consensus.foreignCoinP2SHPrefixes));
-        std::copy(std::begin(foreignCoinP2SH2Prefixes), std::end(foreignCoinP2SH2Prefixes), std::begin(consensus.foreignCoinP2SH2Prefixes));
-        std::copy(std::begin(foreignCoinWIFPrefixes), std::end(foreignCoinWIFPrefixes), std::begin(consensus.foreignCoinWIFPrefixes));
-        std::copy(std::begin(foreignCoinBech32HRPs), std::end(foreignCoinBech32HRPs), std::begin(consensus.foreignCoinBech32HRPs));
-
+        
         // Ring-fork: General consensus fields
         consensus.lastInitialDistributionHeight = LAST_ID_HEIGHT;                                                                   // Height of last block containing initial distribution payouts to foreign coins
         consensus.powLimitInitialDistribution = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");       // Lower-than-powLimit difficulty for initial distribution blocks only
@@ -224,7 +209,7 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        //consensus.nSubsidyHalvingInterval = 210000;   // No halving on chain
+        //consensus.nSubsidyHalvingInterval = 420000;   // Halve every 420,000 blocks
         //consensus.BIP16Exception = uint256S("0x0");   // No BIP16 exception on chain
         consensus.BIP34Height = 100;
         consensus.BIP34Hash = uint256();    // Not needed
@@ -251,21 +236,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = GENESIS_TIMESTAMP;            // Begin activation period with genesis
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = GENESIS_TIMESTAMP + 31536000;   // Genesis + 1 year
 
-        // Ring-fork: Foreign coin fields
-        const int fcc = Consensus::FOREIGN_COIN_COUNT;
-        std::string foreignCoinNames[fcc] =           {"tBTC",  "tLCC", "tDOGE",    "tDASH"};
-        unsigned char foreignCoinP2PKHPrefixes[fcc] = {111,     127,    113,        140};
-        unsigned char foreignCoinP2SHPrefixes[fcc] =  {196,     196,    196,        19};
-        unsigned char foreignCoinP2SH2Prefixes[fcc] = {0,       58,     0,          0};     // Only used by LCC and Litecoin; skipped if 0.
-        unsigned char foreignCoinWIFPrefixes[fcc] =   {239,     239,    241,        239};
-        std::string foreignCoinBech32HRPs[fcc] =      {"tb",    "tlcc", "",         ""};   	// Blank means no bech32 support in foreign chain
-
-        std::copy(std::begin(foreignCoinNames), std::end(foreignCoinNames), std::begin(consensus.foreignCoinNames));        
-        std::copy(std::begin(foreignCoinP2PKHPrefixes), std::end(foreignCoinP2PKHPrefixes), std::begin(consensus.foreignCoinP2PKHPrefixes));
-        std::copy(std::begin(foreignCoinP2SHPrefixes), std::end(foreignCoinP2SHPrefixes), std::begin(consensus.foreignCoinP2SHPrefixes));
-        std::copy(std::begin(foreignCoinP2SH2Prefixes), std::end(foreignCoinP2SH2Prefixes), std::begin(consensus.foreignCoinP2SH2Prefixes));
-        std::copy(std::begin(foreignCoinWIFPrefixes), std::end(foreignCoinWIFPrefixes), std::begin(consensus.foreignCoinWIFPrefixes));
-        std::copy(std::begin(foreignCoinBech32HRPs), std::end(foreignCoinBech32HRPs), std::begin(consensus.foreignCoinBech32HRPs));
+        
 
         // Ring-fork: General consensus fields
         consensus.lastInitialDistributionHeight = 2000;                                                                             // Height of last block containing initial distribution payouts to foreign coins
