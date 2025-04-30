@@ -110,8 +110,8 @@ public:
         consensus.dwarfCreationAddress = "RNGSummonADwarvenMiningArmyXYzDNsz";  // Unspendable address for dwarf creation
         consensus.hiveCommunityAddress = "RNGBEERnxAdgdRfSa45NFy5bZfQPYbztkn";  // Community fund address
         consensus.communityContribFactor = 0.25;               // Optionally, donate dct_value/maxCommunityContribFactor to community fund
-        consensus.dwarfGestationBlocks = 288;           // The number of blocks for a new dwarf to mature (approx 24 hours)
-        consensus.dwarfLifespanBlocks = 1;              // The number of blocks a dwarf lives for after maturation (approx 10 days)
+        consensus.dwarfGestationBlocks = 6;           // The number of blocks for a new dwarf to mature (approx 0.5 hours)
+        consensus.dwarfLifespanBlocks = 1;              // The number of blocks a dwarf lives for after maturation 
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) dwarf hash target
         consensus.minHiveCheckBlock = consensus.lastInitialDistributionHeight + 1;   // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential DCTs)
         consensus.hiveBlockSpacingTarget = 5;               // Target Hive block frequency (1 out of this many Hive and pow blocks combined should be Hivemined)
