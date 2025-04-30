@@ -106,7 +106,7 @@ public:
         consensus.blockSubsidyPopPublic = 0.5 * COIN;
 
         // Ring-fork: Hive: Consensus Fields
-        consensus.dwarfCost = 0.01 * COIN;                  // Cost of a dwarf
+        consensus.dwarfCost = 0.1 * COIN;                  // Cost of a dwarf
         consensus.dwarfCreationAddress = "RNGSummonADwarvenMiningArmyXYzDNsz";  // Unspendable address for dwarf creation
         consensus.hiveCommunityAddress = "RNGBEERnxAdgdRfSa45NFy5bZfQPYbztkn";  // Community fund address
         consensus.communityContribFactor = 0.25;               // Optionally, donate dct_value/maxCommunityContribFactor to community fund
@@ -248,7 +248,7 @@ public:
         consensus.blockSubsidyPopPublic = 0.5 * COIN;
 
         // Ring-fork: Hive: Consensus Fields
-        consensus.dwarfCost = 0.01 * COIN;                  // Cost of a dwarf
+        consensus.dwarfCost = 0.1 * COIN;                  // Cost of a dwarf
         consensus.dwarfCreationAddress = "SUmmonTheTestnetDwarvenArmyXaNdvvm";  // Unspendable address for dwarf creation
         consensus.hiveCommunityAddress = "SW4fmbrApQcUhDd2RtVsRVts7ptizk39C9";  // Community fund address
         consensus.communityContribFactor = 0.25;            // Optionally, donate dct_value/maxCommunityContribFactor to community fund
@@ -341,7 +341,7 @@ class CRegTestParams : public CChainParams {
 public:
     explicit CRegTestParams(const ArgsManager& args) {
         strNetworkID = "regtest";
-        //consensus.nSubsidyHalvingInterval = 150;      // No halving on chain
+        //consensus.nSubsidyHalvingInterval = 128;      // No halving on chain
         //consensus.BIP16Exception = uint256S("0x0");   // No BIP16 exception on chain
         consensus.BIP34Height = 100; // BIP34 activated on regtest (Used in functional tests)
         consensus.BIP34Hash = uint256();    // Not needed
