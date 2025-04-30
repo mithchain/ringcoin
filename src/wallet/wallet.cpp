@@ -30,6 +30,13 @@
 #include <util/bip32.h>
 #include <util/moneystr.h>
 #include <wallet/fees.h>
+#include <wallet/wallet.h>
+#include <chainparams.h>
+#include <util/moneystr.h>
+#include <crypto/sha256.h>
+#include <validation.h>
+#include <node/transaction.h>
+
 
 #include <algorithm>
 #include <assert.h>
@@ -5209,3 +5216,308 @@ bool CWallet::AddKeyOrigin(const CPubKey& pubkey, const KeyOriginInfo& info)
     mapKeyMetadata[pubkey.GetID()].hdKeypath = WriteHDKeypath(info.path);
     return WriteKeyMetadata(mapKeyMetadata[pubkey.GetID()], pubkey, true);
 }
+
+std::vector<unsigned char> GenerateRandomNumber(interfaces::Chain::Lock& locked_chain, int currentHeight) {
+    std::string hashInput;
+    int start = std::max(100, currentHeight - 5);
+    int end = currentHeight - 1;
+    for (int i = start; i <= end; ++i) {
+        CBlockIndex* pindex = locked_chain.getBlockIndex(i);
+        if (pindex) {
+            hashInput += pindex->GetBlockHash().ToString();
+        }
+    }
+    uint256 hash = Hash(SHA256(hashInput.begin(), hashInput.end()), SHA256(hashInput.begin(), hashInput.end()));
+    std::vector<unsigned char> randomNumber(32);
+    memcpy(randomNumber.data(), hash.begin(), 32);
+    return randomNumber;
+}
+
+void CWallet::AvailableCoins(interfaces::Chain::Lock& locked_chain, std::vector<COutput>& vCoins, bool fOnlySafe, const CCoinControl* coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t nMaximumCount, const int nMinDepth, const int nMaxDepth, CoinType coinType) const
+{
+    LOCK2(cs_main, cs_wallet);
+
+    vCoins.clear();
+    CAmount nTotal = 0;
+
+    for (const auto& entry : mapWallet) {
+        const uint256& wtxid = entry.first;
+        const CWalletTx& wtx = entry.second;
+
+        if (!wtx.IsTrusted(locked_chain)) continue;
+        if (wtx.GetDepthInMainChain(locked_chain) < nMinDepth || wtx.GetDepthInMainChain(locked_chain) > nMaxDepth) continue;
+
+        for (unsigned int i = 0; i < wtx.tx->vout.size(); i++) {
+            const CTxOut& txout = wtx.tx->vout[i];
+            CTxDestination address;
+            if (!ExtractDestination(txout.scriptPubKey, address)) continue;
+
+            std::string addrStr = EncodeDestination(address, coinType == DIAMOND);
+            bool isCorrectType = (coinType == RING && addrStr.rfind("rng", 0) == 0) ||
+                                (coinType == DIAMOND && addrStr.rfind("dia", 0) == 0);
+            if (!isCorrectType) continue;
+
+            isminetype mine = IsMine(txout);
+            if (!(mine & ISMINE_SPENDABLE)) continue;
+
+            if (txout.nValue < nMinimumAmount || txout.nValue > nMaximumAmount) continue;
+
+            if (coinControl && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint(wtxid, i))) continue;
+
+            if (IsLockedCoin(wtxid, i)) continue;
+
+            if (fOnlySafe && !wtx.IsTrusted(locked_chain)) continue;
+
+            vCoins.emplace_back(wtx, i, wtx.GetDepthInMainChain(locked_chain), mine & ISMINE_SPENDABLE);
+            nTotal += txout.nValue;
+
+            if (nTotal >= nMinimumSumAmount) break;
+            if (nMaximumCount > 0 && vCoins.size() >= nMaximumCount) break;
+        }
+        if (nTotal >= nMinimumSumAmount) break;
+    }
+}
+
+bool CWallet::CreateTransaction(const std::string& destAddress, CAmount amount, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, std::string& strFailReason, const CCoinControl* coin_control, CoinType coinType)
+{
+    auto locked_chain = chain().lock();
+    LOCK2(cs_main, cs_wallet);
+
+    if (amount <= 0 || amount > MAX_MONEY) {
+        strFailReason = _("Invalid amount");
+        return false;
+    }
+
+    bool isDiamond = (coinType == DIAMOND);
+    CTxDestination dest = DecodeDestination(destAddress, isDiamond);
+    if (!IsValidDestination(dest)) {
+        strFailReason = isDiamond ? _("Invalid Diamond address") : _("Invalid Ring address");
+        return false;
+    }
+
+    std::string expectedPrefix = isDiamond ? "dia" : "rng";
+    if (destAddress.rfind(expectedPrefix, 0) != 0) {
+        strFailReason = strprintf(_("Address does not start with %s"), expectedPrefix);
+        return false;
+    }
+
+    CCoinControl local_coin_control;
+    if (coin_control) {
+        local_coin_control = *coin_control;
+    }
+    local_coin_control.fAllowOtherInputs = true;
+    CAmount nAvailableBalance = GetAvailableBalance(&local_coin_control);
+    if (amount + m_min_fee > nAvailableBalance) {
+        strFailReason = isDiamond ? _("Insufficient Diamond funds") : _("Insufficient Ring funds");
+        return false;
+    }
+
+    CMutableTransaction txNew;
+    txNew.nLockTime = locked_chain->getHeight().value_or(0);
+
+    CScript destScript = GetScriptForDestination(dest);
+    txNew.vout.push_back(CTxOut(amount, destScript));
+
+    nFeeRet = m_min_fee;
+    CAmount nValueToSelect = amount + nFeeRet;
+
+    std::vector<COutput> vAvailableCoins;
+    AvailableCoins(*locked_chain, vAvailableCoins, true, &local_coin_control, 1, MAX_MONEY, MAX_MONEY, 0, 0, 9999999, coinType);
+    std::set<CInputCoin> setCoins;
+    CAmount nValueRet = 0;
+    CoinSelectionParams coin_selection_params(true, 0, 0, CFeeRate(m_min_fee), 0);
+    bool bnb_used = false;
+
+    if (vAvailableCoins.empty()) {
+        strFailReason = isDiamond ? _("No Diamond coins available") : _("No Ring coins available");
+        return false;
+    }
+
+    if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueRet, local_coin_control, coin_selection_params, bnb_used)) {
+        strFailReason = isDiamond ? _("Unable to select sufficient Diamond inputs") : _("Unable to select sufficient Ring inputs");
+        return false;
+    }
+
+    for (const CInputCoin& coin : setCoins) {
+        txNew.vin.push_back(CTxIn(coin.outpoint));
+    }
+
+    CAmount nChange = nValueRet - amount - nFeeRet;
+    int nChangePosInOut = -1;
+    if (nChange >= MIN_FINAL_CHANGE) {
+        CPubKey vchPubKey;
+        if (!reservekey.GetReservedKey(vchPubKey, false)) {
+            strFailReason = _("Failed to get change address");
+            return false;
+        }
+        CScript changeScript = GetScriptForDestination(WitnessV0KeyHash(vchPubKey.GetID()));
+        nChangePosInOut = GetRandInt(txNew.vout.size() + 1);
+        txNew.vout.insert(txNew.vout.begin() + nChangePosInOut, CTxOut(nChange, changeScript));
+    } else {
+        nFeeRet += nChange;
+    }
+
+    std::string fundError;
+    if (!FundTransaction(txNew, nFeeRet, nChangePosInOut, fundError, true, {}, local_coin_control)) {
+        strFailReason = strprintf(_("Failed to fund transaction: %s"), fundError);
+        return false;
+    }
+
+    if (!SignTransaction(txNew)) {
+        strFailReason = _("Failed to sign transaction");
+        reservekey.ReturnKey();
+        return false;
+    }
+
+    CTransactionRef txRef = MakeTransactionRef(txNew);
+    CValidationState state;
+    if (!CommitTransaction(txRef, {}, {}, reservekey, nullptr, state)) {
+        strFailReason = strprintf(_("Failed to commit transaction: %s"), FormatStateMessage(state));
+        return false;
+    }
+
+    uint256 txid;
+    std::string err_string;
+    if (BroadcastTransaction(txRef, txid, err_string, 0) != TransactionError::OK) {
+        strFailReason = strprintf(_("Failed to broadcast transaction: %s"), err_string);
+        reservekey.ReturnKey();
+        return false;
+    }
+
+    wtxNew = CWalletTx(this, txRef);
+    NotifyTransactionChanged(this, wtxNew.GetHash(), CT_NEW);
+
+    return true;
+}
+
+bool CWallet::CreateBurnTransaction(const std::string& diamondAddress, CAmount amount, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, std::string& strFailReason, const CCoinControl* coin_control)
+{
+    auto locked_chain = chain().lock();
+    LOCK2(cs_main, cs_wallet);
+
+    int currentHeight = locked_chain->getHeight().value_or(0);
+    if (currentHeight < 100) {
+        strFailReason = _("Burn transactions not allowed before height 100");
+        return false;
+    }
+
+    if (amount <= 0 || amount > MAX_MONEY) {
+        strFailReason = _("Invalid amount");
+        return false;
+    }
+
+    CTxDestination diamondDest = DecodeDestination(diamondAddress, true);
+    if (!IsValidDestination(diamondDest)) {
+        strFailReason = _("Invalid Diamond address");
+        return false;
+    }
+
+    std::vector<unsigned char> randomNumber = GenerateRandomNumber(*locked_chain, currentHeight);
+
+    CCoinControl local_coin_control;
+    if (coin_control) {
+        local_coin_control = *coin_control;
+    }
+    local_coin_control.fAllowOtherInputs = true;
+    CAmount nAvailableBalance = GetAvailableBalance(&local_coin_control);
+    if (amount + m_min_fee > nAvailableBalance) {
+        strFailReason = _("Insufficient Ring funds");
+        return false;
+    }
+
+    CMutableTransaction txNew;
+    txNew.nLockTime = currentHeight;
+
+    CTxDestination communityDest = DecodeDestination(Params().GetConsensus().hiveCommunityAddress, false);
+    if (!IsValidDestination(communityDest)) {
+        strFailReason = _("Invalid hive community address");
+        return false;
+    }
+    CScript communityScript = GetScriptForDestination(communityDest);
+    txNew.vout.push_back(CTxOut(amount, communityScript));
+
+    CScript burnScript = CScript() << OP_RETURN << OP_BURN << randomNumber;
+    txNew.vout.push_back(CTxOut(0, burnScript));
+
+    nFeeRet = m_min_fee;
+    CAmount nValueToSelect = amount + nFeeRet;
+
+    std::vector<COutput> vAvailableCoins;
+    AvailableCoins(*locked_chain, vAvailableCoins, true, &local_coin_control, 1, MAX_MONEY, MAX_MONEY, 0, 0, 9999999, RING);
+    std::set<CInputCoin> setCoins;
+    CAmount nValueRet = 0;
+    CoinSelectionParams coin_selection_params(true, 0, 0, CFeeRate(m_min_fee), 0);
+    bool bnb_used = false;
+
+    if (vAvailableCoins.empty()) {
+        strFailReason = _("No Ring coins available");
+        return false;
+    }
+
+    if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins, nValueRet, local_coin_control, coin_selection_params, bnb_used)) {
+        strFailReason = _("Unable to select sufficient Ring inputs");
+        return false;
+    }
+
+    for (const CInputCoin& coin : setCoins) {
+        txNew.vin.push_back(CTxIn(coin.outpoint));
+    }
+
+    CAmount nChange = nValueRet - amount - nFeeRet;
+    int nChangePosInOut = -1;
+    if (nChange >= MIN_FINAL_CHANGE) {
+        CPubKey vchPubKey;
+        if (!reservekey.GetReservedKey(vchPubKey, false)) {
+            strFailReason = _("Failed to get change address");
+            return false;
+        }
+        CScript changeScript = GetScriptForDestination(WitnessV0KeyHash(vchPubKey.GetID()));
+        nChangePosInOut = GetRandInt(txNew.vout.size() + 1);
+        txNew.vout.insert(txNew.vout.begin() + nChangePosInOut, CTxOut(nChange, changeScript));
+    } else {
+        nFeeRet += nChange;
+    }
+
+    std::string fundError;
+    if (!FundTransaction(txNew, nFeeRet, nChangePosInOut, fundError, true, {}, local_coin_control)) {
+        strFailReason = strprintf(_("Failed to fund transaction: %s"), fundError);
+        return false;
+    }
+
+    if (!SignTransaction(txNew)) {
+        strFailReason = _("Failed to sign transaction");
+        reservekey.ReturnKey();
+        return false;
+    }
+
+    CValidationState state;
+    if (!IsRingBurnTx(MakeTransactionRef(txNew), Params().GetConsensus())) {
+        strFailReason = _("Transaction is not a valid Ring burn transaction");
+        reservekey.ReturnKey();
+        return false;
+    }
+
+    CTransactionRef txRef = MakeTransactionRef(txNew);
+    mapValue_t mapValue;
+    mapValue["diamond_address"] = diamondAddress;
+    mapValue["random_number"] = HexStr(randomNumber);
+    std::vector<std::pair<std::string, std::string>> orderForm;
+    if (!CommitTransaction(txRef, mapValue, orderForm, reservekey, nullptr, state)) {
+        strFailReason = strprintf(_("Failed to commit transaction: %s"), FormatStateMessage(state));
+        return false;
+    }
+
+    uint256 txid;
+    std::string err_string;
+    if (BroadcastTransaction(txRef, txid, err_string, 0) != TransactionError::OK) {
+        strFailReason = strprintf(_("Failed to broadcast transaction: %s"), err_string);
+        reservekey.ReturnKey();
+        return false;
+    }
+
+    wtxNew = CWalletTx(this, txRef);
+    NotifyTransactionChanged(this, wtxNew.GetHash(), CT_NEW);
+
+    return true;
+}
+
