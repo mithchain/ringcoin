@@ -273,8 +273,8 @@ public:
         consensus.popMinPrivateGameDepth = COINBASE_MATURITY;                           // Private game source transactions must be at least this many blocks deep
         consensus.popMaxPrivateGameDepth = consensus.popMinPrivateGameDepth + 50;       // Private game source transactions must be at most this many blocks deep
         consensus.popMaxPublicGameDepth = consensus.popMaxPrivateGameDepth + 200;       // Public game source transactions must be at most this many blocks deep
-        consensus.popScoreAdjustWindowSize = 144;            // Windows size for adjusting pop score target
-        consensus.popMinScoreTarget = 100;                   // Min score target
+        consensus.popScoreAdjustWindowSize = 12;            // Windows size for adjusting pop score target
+        consensus.popMinScoreTarget = 90;                   // Min score target
         consensus.popMaxScoreTarget = 240;                  // Max score target
 
         // The best chain should have at least this much work.
