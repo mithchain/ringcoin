@@ -27,6 +27,7 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
+    std::string diamondIdentifier;
 
     CBlockHeader()
     {
@@ -43,6 +44,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        READWRITE(diamondIdentifier);
     }
 
     void SetNull()
@@ -53,6 +55,7 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
+        diamondIdentifier.clear();
     }
 
     bool IsNull() const
@@ -99,6 +102,7 @@ public:
     {
         SetNull();
         *(static_cast<CBlockHeader*>(this)) = header;
+        diamondIdentifier = header.diamondIdentifier;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -125,10 +129,27 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.diamondIdentifier = diamondIdentifier;
         return block;
     }
 
-    std::string ToString() const;
+    std::string ToString() const
+    {
+        std::stringstream s;
+        s << "CBlock(hash=" << GetHash().ToString()
+          << ", ver=0x" << std::hex << nVersion
+          << ", hashPrevBlock=" << hashPrevBlock.ToString()
+          << ", hashMerkleRoot=" << hashMerkleRoot.ToString()
+          << ", nTime=" << nTime
+          << ", nBits=" << nBits
+          << ", nNonce=" << nNonce
+          << ", diamondIdentifier=" << diamondIdentifier 
+          << ", vtx=" << vtx.size() << ")\n";
+        for (const auto& tx : vtx) {
+            s << "  " << tx->ToString() << "\n";
+        }
+        return s.str();
+    }
 };
 
 /** Describes a place in the block chain to another node such that if the
