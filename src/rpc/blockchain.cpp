@@ -2451,3 +2451,14 @@ void RegisterBlockchainRPCCommands(CRPCTable &t)
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }
+
+CAmount GetBalance(TransactionType type) const {
+    CAmount nTotal = 0;
+    for (const auto& pair : mapWallet) {
+        const CWalletTx* pcoin = &pair.second;
+        if (pcoin->IsTrusted() && pcoin->GetDepthInMainChain() > 0 && pcoin->tx->txType == type) {
+            nTotal += pcoin->GetAvailableCredit(true);
+        }
+    }
+    return nTotal;
+}
