@@ -74,30 +74,14 @@ public:
         consensus.BIP65Height = 1;                      // BIP65 & 66 active since start
         consensus.BIP66Height = 1;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetSpacing = 300;               // Targeting 1 pow block (3 blocks across all types) in this many seconds
-        consensus.nExpectedBlockSpacing = consensus.nPowTargetSpacing / 3;
+        consensus.nPowTargetSpacing = 300;               // Targeting 1 pow block in this many seconds
+        consensus.nExpectedBlockSpacing = 300;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 4740; // 80% required for UASF activation
         consensus.nMinerConfirmationWindow = 5925;
-
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601;    // January 1, 2008
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999;      // December 31, 2008
-
-        // Deployment of BIP68, BIP112, and BIP113.
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = GENESIS_TIMESTAMP;               // Begin activation period with genesis
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = GENESIS_TIMESTAMP + 31536000;      // Genesis + 1 year
-
-        // Deployment of SegWit (BIP141, BIP143, and BIP147)
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = GENESIS_TIMESTAMP;            // Begin activation period with genesis
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = GENESIS_TIMESTAMP + 31536000;   // Genesis + 1 year
-
-        
+             
         // Ring-fork: General consensus fields
-        consensus.lastInitialDistributionHeight = LAST_ID_HEIGHT;                                                                   // Height of last block containing initial distribution payouts to foreign coins
         consensus.powLimitInitialDistribution = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");       // Lower-than-powLimit difficulty for initial distribution blocks only
         consensus.blockSubsidyPow = 128 * COIN;             // Miner rewards for each block type
         consensus.blockSubsidyHive = 1 * COIN;
@@ -105,16 +89,14 @@ public:
         consensus.blockSubsidyPopPublic = 0.5 * COIN;
 
         // Ring-fork: Hive: Consensus Fields
-        consensus.dwarfCost = 0.1 * COIN;                  // Cost of a dwarf
+        consensus.dwarfCost = 1 * COIN;                  // Cost of a dwarf
         consensus.dwarfCreationAddress = "RNGSummonADwarvenMiningArmyXYzDNsz";  // Unspendable address for dwarf creation
-        consensus.hiveCommunityAddress = "RNGBEERnxAdgdRfSa45NFy5bZfQPYbztkn";  // Community fund address
-        consensus.communityContribFactor = 0.25;               // Optionally, donate dct_value/maxCommunityContribFactor to community fund
         consensus.dwarfGestationBlocks = 6;           // The number of blocks for a new dwarf to mature (approx 0.5 hours)
         consensus.dwarfLifespanBlocks = 1;              // The number of blocks a dwarf lives for after maturation 
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) dwarf hash target
         consensus.minHiveCheckBlock = consensus.lastInitialDistributionHeight + 1;   // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential DCTs)
         consensus.hiveBlockSpacingTarget = 5;               // Target Hive block frequency (1 out of this many Hive and pow blocks combined should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 1;        // Observed Hive block frequency (1 out of this many Hive and pow blocks combined are observed to be Hive)
+        consensus.hiveBlockSpacingTargetTypical = 5;        // Observed Hive block frequency (1 out of this many Hive and pow blocks combined are observed to be Hive)
         consensus.hiveNonceMarker = 1;                      // Nonce marker for hivemined blocks
         consensus.minK = 2;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxK = 16;                                // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
@@ -167,7 +149,7 @@ public:
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
         //vSeeds.emplace_back("xxxxx.xxxxx");
-        vSeeds.emplace_back("mainnet.ringcoin.tech");
+        vSeeds.emplace_back("144.172.122.15:8312");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,60);  // for R
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,81);  // for Z
@@ -216,47 +198,27 @@ public:
         consensus.BIP66Height = 1;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetSpacing = 300; // 300 secs
-        consensus.nExpectedBlockSpacing = consensus.nPowTargetSpacing / 3;
+        consensus.nExpectedBlockSpacing = 300;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 75; // Require 75% of last 100 blocks to activate rulechanges
-        consensus.nMinerConfirmationWindow = 100;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
-
-        // Deployment of BIP68, BIP112, and BIP113.
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = GENESIS_TIMESTAMP;               // Begin activation period with genesis
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = GENESIS_TIMESTAMP + 31536000;      // Genesis + 1 year
-
-        // Deployment of SegWit (BIP141, BIP143, and BIP147)
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = GENESIS_TIMESTAMP;            // Begin activation period with genesis
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = GENESIS_TIMESTAMP + 31536000;   // Genesis + 1 year
-
-        
+        consensus.nMinerConfirmationWindow = 100;              
 
         // Ring-fork: General consensus fields
-        consensus.lastInitialDistributionHeight = 2000;                                                                             // Height of last block containing initial distribution payouts to foreign coins
-        consensus.powLimitInitialDistribution = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");       // Lower-than-powLimit difficulty for initial distribution blocks only
-        consensus.slowStartBlocks = 400;                                                                                            // Scale initial block reward up over this many blocks      
         consensus.blockSubsidyPow = 128 * COIN;             // Miner rewards for each block type
         consensus.blockSubsidyHive = 1 * COIN;
         consensus.blockSubsidyPopPrivate = 1 * COIN;
         consensus.blockSubsidyPopPublic = 0.5 * COIN;
 
         // Ring-fork: Hive: Consensus Fields
-        consensus.dwarfCost = 0.1 * COIN;                  // Cost of a dwarf
+        consensus.dwarfCost = 1 * COIN;                     // Cost of a dwarf
         consensus.dwarfCreationAddress = "SUmmonTheTestnetDwarvenArmyXaNdvvm";  // Unspendable address for dwarf creation
-        consensus.hiveCommunityAddress = "SW4fmbrApQcUhDd2RtVsRVts7ptizk39C9";  // Community fund address
-        consensus.communityContribFactor = 0.25;            // Optionally, donate dct_value/maxCommunityContribFactor to community fund
-        consensus.dwarfGestationBlocks = 288;               // The number of blocks for a new dwarf to mature (approx 24 hours)
-        consensus.dwarfLifespanBlocks = 30000;              // The number of blocks a dwarf lives for after maturation 
+        consensus.dwarfGestationBlocks = 6;                 // The number of blocks for a new dwarf to mature (approx 0.5 hours)
+        consensus.dwarfLifespanBlocks = 1;                  // The number of blocks a dwarf lives for after maturation 
         consensus.powLimitHive = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");  // Highest (easiest) dwarf hash target
         consensus.minHiveCheckBlock = consensus.lastInitialDistributionHeight + 1;   // Don't bother checking below this height for Hive blocks (not used for consensus/validation checks, just efficiency when looking for potential DCTs)
-        consensus.hiveBlockSpacingTarget = 2;               // Target Hive block frequency (1 out of this many Hive and pow blocks combined should be Hivemined)
-        consensus.hiveBlockSpacingTargetTypical = 2;        // Observed Hive block frequency (1 out of this many Hive and pow blocks combined are observed to be Hive)
+        consensus.hiveBlockSpacingTarget = 5;               // Target Hive block frequency (1 out of this many Hive and pow blocks combined should be Hivemined)
+        consensus.hiveBlockSpacingTargetTypical = 5;        // Observed Hive block frequency (1 out of this many Hive and pow blocks combined are observed to be Hive)
         consensus.hiveNonceMarker = 1;                      // Nonce marker for hivemined blocks
         consensus.minK = 2;                                 // Minimum chainwork scale for Hive blocks (see Hive whitepaper section 5)
         consensus.maxK = 16;                                // Maximum chainwork scale for Hive blocks (see Hive whitepaper section 5)
@@ -264,8 +226,8 @@ public:
         consensus.maxKPow = 5;                              // Maximum chainwork scale for PoW blocks
         consensus.powSplit1 = 0.0004;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved
         consensus.powSplit2 = 0.0002;                       // Below this Hive difficulty threshold, PoW block chainwork bonus is halved again
-        consensus.maxConsecutiveHiveBlocks = 2;             // Maximum hive blocks that can occur consecutively before a PoW block is required
-        consensus.hiveDifficultyWindow = 36;                // How many blocks the SMA averages over in hive difficulty adjust
+        consensus.maxConsecutiveHiveBlocks = 1;             // Maximum hive blocks that can occur consecutively before a PoW block is required
+        consensus.hiveDifficultyWindow = 5000;                // How many blocks the SMA averages over in hive difficulty adjust
 
         // Ring-fork: Pop: Consensus fields
         consensus.popBlocksPerHive = 1;                     // Expected number of pop blocks per Hive block. Note that increasing this here is not enough to spawn additional games, etc; this is used for time estimations.
@@ -298,7 +260,7 @@ public:
         assert(genesis.hashMerkleRoot == uint256S(GENESIS_MERKLE));
 
         vFixedSeeds.clear();
-        vSeeds.emplace_back("testnet.ringcoin.tech");
+        vSeeds.emplace_back("144.172.122.15:8313");
         
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,63); // For S
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,78); // For Y
@@ -340,29 +302,20 @@ class CRegTestParams : public CChainParams {
 public:
     explicit CRegTestParams(const ArgsManager& args) {
         strNetworkID = "regtest";
-        //consensus.nSubsidyHalvingInterval = 128;      // No halving on chain
+        //consensus.nSubsidyHalvingInterval = 128;      
         //consensus.BIP16Exception = uint256S("0x0");   // No BIP16 exception on chain
         consensus.BIP34Height = 100; // BIP34 activated on regtest (Used in functional tests)
         consensus.BIP34Hash = uint256();    // Not needed
         consensus.BIP65Height = 1; // BIP65 activated on regtest (Used in functional tests)
         consensus.BIP66Height = 1; // BIP66 activated on regtest (Used in functional tests)
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetSpacing = 15 * 60; // 15 minutes
-        consensus.nExpectedBlockSpacing = consensus.nPowTargetSpacing / 3;
+        consensus.nPowTargetSpacing = 5 * 60; // 5 minutes
+        consensus.nExpectedBlockSpacing = 300;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
-        consensus.nMinerConfirmationWindow = 144;       // Faster than normal for regtest (144 instead of 2016)
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
-
+        consensus.nMinerConfirmationWindow = 12;       // Faster than normal for regtest (12 instead of 2016)
+        
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 
