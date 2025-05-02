@@ -2204,6 +2204,17 @@ CAmount CWallet::GetBalance(const isminefilter& filter, const int min_depth) con
     return nTotal;
 }
 
+CAmount CWallet::GetBalance(TransactionType type) const {
+    CAmount nTotal = 0;
+    for (const auto& pair : mapWallet) {
+        const CWalletTx* pcoin = &pair.second;
+        if (pcoin->IsTrusted() && pcoin->GetDepthInMainChain() > 0 && pcoin->tx->txType == type) {
+            nTotal += pcoin->GetAvailableCredit(true);
+        }
+    }
+    return nTotal;
+}
+
 CAmount CWallet::GetUnconfirmedBalance() const
 {
     CAmount nTotal = 0;
