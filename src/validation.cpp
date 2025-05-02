@@ -1177,15 +1177,21 @@ CAmount GetBlockSubsidyPow(int nHeight, const Consensus::Params& consensusParams
     if (nHeight <= consensusParams.lastInitialDistributionHeight)
         return MAX_MONEY;
 
-    // Enable standard flat subsidy
+    // Enable standard subsidy with halving logic
+    int64_t blocksSinceInitialDistribution = nHeight - consensusParams.lastInitialDistributionHeight;
+
+    // Calculate the number of halvings
+    int halvings = blocksSinceInitialDistribution / consensusParams.nSubsidyHalvingInterval;
+
+    // Prevent subsidy from going negative after 64 halvings
+    if (halvings >= 64)
+        return 0;
+
+    // Initial subsidy
     CAmount nSubsidy = consensusParams.blockSubsidyPow;
 
-    // Ring-fork: Slow-start the first n blocks to prevent early miners having an unfair advantage
-    int64_t blocksSinceInitialDistribution = nHeight - consensusParams.lastInitialDistributionHeight;
-    if (blocksSinceInitialDistribution < consensusParams.slowStartBlocks) {
-        CAmount incrementPerBlock = nSubsidy / consensusParams.slowStartBlocks;
-        nSubsidy = blocksSinceInitialDistribution * incrementPerBlock;
-    }
+    // Apply halving
+    nSubsidy >>= halvings; // Equivalent to nSubsidy = nSubsidy / (2^halvings)
 
     return nSubsidy;
 }
