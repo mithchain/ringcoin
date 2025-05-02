@@ -1170,31 +1170,29 @@ bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CBlockIndex* pindex
     return ReadRawBlockFromDisk(block, block_pos, message_start);
 }
 
-// Ring-fork: Pow block subsidy. Checks for ID blocks, slow starts public blocks, no halvenings.
+// Ring-fork: Pow block subsidy. 
 CAmount GetBlockSubsidyPow(int nHeight, const Consensus::Params& consensusParams)
 {
-    // Allow any subsidy up to the last initial distribution block
-    if (nHeight <= consensusParams.lastInitialDistributionHeight)
-        return MAX_MONEY;
-
-    // Enable standard subsidy with halving logic
-    int64_t blocksSinceInitialDistribution = nHeight - consensusParams.lastInitialDistributionHeight;
-
     // Calculate the number of halvings
-    int halvings = blocksSinceInitialDistribution / consensusParams.nSubsidyHalvingInterval;
+    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
 
-    // Prevent subsidy from going negative after 64 halvings
-    if (halvings >= 64)
-        return 0;
+    // Initial subsidy = 128 * COIN
+    CAmount nSubsidy = 128 * COIN;
 
-    // Initial subsidy
-    CAmount nSubsidy = consensusParams.blockSubsidyPow;
+    // Apply halving, minimum floor at 16 * COIN
+    for (int i = 0; i < halvings; ++i) {
+        if (nSubsidy > 16 * COIN)
+            nSubsidy /= 2;
+    }
 
-    // Apply halving
-    nSubsidy >>= halvings; // Equivalent to nSubsidy = nSubsidy / (2^halvings)
+    // Ensure minimum subsidy is 16 * COIN
+    if (nSubsidy < 16 * COIN)
+        nSubsidy = 16 * COIN;
 
     return nSubsidy;
 }
+
+
 
 // Ring-fork: Hive block subsidy.
 CAmount GetBlockSubsidyHive(const Consensus::Params& consensusParams)
